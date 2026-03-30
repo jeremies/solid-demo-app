@@ -6,7 +6,7 @@ import { onCleanup } from "solid-js";
 const TagsPage = () => {
   setGlobalBackground("#111");
   const watchIconTextStyle = {
-    fontWeight: 600,
+    fontWeight: 400,
     fontSize: 22,
     lineHeight: 40,
     y: 1,

@@ -170,7 +170,7 @@ const Button = {
   $focus: {
     color: theme.primaryLight,
     shadow: {
-        color: 0x00000064,
+        color: 0x0000007a,
         projection: [0, 16, 24, -6],
       },
   }

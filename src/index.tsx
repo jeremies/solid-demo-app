@@ -61,6 +61,7 @@ const LargeImagePerformance = lazy(() => import("./pages/LargeImagePerformance")
 const MixedImagePerformance = lazy(() => import("./pages/MixedImagePerformance"));
 const TextureCompressionPerformance = lazy(() => import("./pages/TextureCompressionPerformance"));
 const ComplexFlexPage = lazy(() => import("./pages/ComplexFlex"));
+const BenchmarkPage = lazy(() => import("./pages/Benchmark"));
 
 let numImageWorkers = 4;
 const urlParams = new URLSearchParams(window.location.search);
@@ -190,6 +191,7 @@ render(() => (
         <Route path="mixed-image-performance" component={MixedImagePerformance} />
         <Route path="texture-compression-performance" component={TextureCompressionPerformance} />
         <Route path="complexflex" component={ComplexFlexPage} />
+        <Route path="benchmark" component={BenchmarkPage} preload={tmdbData} />
 
         <Route path="*all" component={NotFound} />
       </Route>

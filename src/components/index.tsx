@@ -12,10 +12,11 @@ import { type Tile } from "../api/formatters/ItemFormatter";
 
 export function Thumbnail(props: IntrinsicNodeProps & { item: Tile }) {
   return (
-    <Image
+    <View
       {...props}
       id="thumbnail"
       src={props.item.src}
+      group={'recommendation'}
       placeholder="./assets/fallback.png"
       item={props.item}
       announce={[props.item.title, 'PAUSE-1', props.item.overview]}
@@ -97,6 +98,7 @@ const titleRowStyles = {
 };
 
 export function TitleRow(props: TileRowProps) {
+  const slug = () => props.title?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '') || 'row';
   return (
     <View height={props.height} forwardFocus={1} marginTop={30}>
       <Text skipFocus style={titleRowStyles}>
@@ -104,7 +106,7 @@ export function TitleRow(props: TileRowProps) {
       </Text>
       <VirtualRow gap={20} displaySize={8} bufferSize={3} each={props.items} y={50} scroll={props.scroll} wrap={props.wrap} selected={props.selected}>
         {(item, index) => (
-          <Dynamic component={typeToComponent[props.rowType || props.row?.type]} index={index()} item={item()} />
+          <Dynamic component={typeToComponent[props.rowType || props.row?.type]} index={index()} item={item()} group={slug()} />
         )}
       </VirtualRow>
     </View>
@@ -117,7 +119,7 @@ const posterStyles = {
   scale: 1,
   zIndex: 2,
   color: "#b0b0b0",
-  //borderRadius: 8,
+  borderRadius: 8,
   transition: {
     scale: { duration: 200, easing: "linear" }
   },
@@ -131,7 +133,7 @@ export function Poster(props: NodeProps) {
       title={props.item?.shortTitle}
       backdrop={props.item?.backdrop}
       {...props}
-      onFail={(node) => (node.src = "failback.png")}
+      onFail={(node) => (node.src = "./assets/fallback.png")}
       style={posterStyles}
     />
   );
@@ -164,7 +166,7 @@ export function PosterTitle(props: NodeProps & { title: string }) {
       src={props.item?.src}
       backdrop={props.item?.backdrop}
       {...props}
-      onFail={(node) => (node.src = "failback.png")}
+      onFail={(node) => (node.src = "./assets/fallback.png")}
       style={posterStyles}
       forwardStates
     >

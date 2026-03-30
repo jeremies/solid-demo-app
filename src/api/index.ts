@@ -12,7 +12,10 @@ const defaultFetchParams = {
   }
 };
 
-export function getImageUrl(path: string, posterSize: string = basePosterSize) {
+export function getImageUrl(path: string | null | undefined, posterSize: string = basePosterSize) {
+  if (!path) {
+    return "./assets/fallback.png";
+  }
   return baseImageUrl + posterSize + path;
 }
 

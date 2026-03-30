@@ -112,6 +112,7 @@ const Entity = (props) => {
               onFocus={onRowFocus}
               onEnter={onEnter}
               announce={"Recommendations"}
+              group={'recommendation'}
               items={props.data.recommendations()}
               width={1620}
             />
