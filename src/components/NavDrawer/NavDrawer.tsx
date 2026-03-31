@@ -13,9 +13,9 @@ interface NavButtonProps extends IntrinsicNodeProps {
 }
 
 const NavButtonTextStyles = {
-  x: 116,
+  x: 112,
   fontSize: 38,
-  lineHeight: 70,
+  lineHeight: 76,
   alpha: 0,
   color: theme.textPrimary,
   $active: {
@@ -59,12 +59,12 @@ export default function NavDrawer(props) {
   }
 
   const selectedButton = createMemo(() => {
-    if (useMatch(() => "/browse/all")()) return 366;
-    if (useMatch(() => "/browse/movie")()) return 462;
-    if (useMatch(() => "/browse/tv")()) return 548;
-    if (useMatch(() => "/examples")()) return 638;
-    if (useMatch(() => "/benchmark")()) return 728;
-    return 366;
+    if (useMatch(() => "/browse/all")()) return 308;
+    if (useMatch(() => "/browse/movie")()) return 398;
+    if (useMatch(() => "/browse/tv")()) return 488;
+    if (useMatch(() => "/examples")()) return 578;
+    if (useMatch(() => "/benchmark")()) return 668;
+    return 308;
   });
 
   return (

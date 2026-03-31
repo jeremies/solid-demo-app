@@ -1,4 +1,4 @@
-import { createEffect, on, createSignal, batch } from "solid-js";
+import { createEffect, on, createSignal, batch, Show } from "solid-js";
 import { ElementNode, activeElement, View, Text, renderer } from "@lightningtv/solid";
 import { LazyRow, LazyColumn, useFocusStack, VirtualRow, resetCounter } from "@lightningtv/solid/primitives";
 import { Hero, TitleRow, AssetPanel } from "../components";
@@ -23,6 +23,8 @@ const Benchmark = (props) => {
   const [benchmarkStatus, setBenchmarkStatus] = createSignal("Waiting for data...");
   const [benchmarkRunning, setBenchmarkRunning] = createSignal(false);
   const [benchmarkDone, setBenchmarkDone] = createSignal(false);
+  const [dataLoaded, setDataLoaded] = createSignal(false);
+  const [renderTime, setRenderTime] = createSignal<number | null>(null);
 
   // FPS tracking
   let fpsValues: number[] = [];
@@ -126,11 +128,23 @@ const Benchmark = (props) => {
 
     // Wait for the first row's items to resolve (they are resources)
     const firstItems = rows[0].items();
-    if (firstItems && firstItems.length > 0 && !benchmarkDone() && !benchmarkRunning()) {
-      // Attach FPS listener early
-      attachFpsListener();
-      // Start the benchmark after a brief setup time
-      setTimeout(() => runBenchmark(), 2000);
+    if (firstItems && firstItems.length > 0) {
+      if (!dataLoaded()) {
+        const startTime = performance.now();
+        setDataLoaded(true);
+        renderer.on('idle', () => {
+          if (renderTime() === null) {
+            setRenderTime(performance.now() - startTime);
+          }
+        });
+      }
+
+      if (!benchmarkDone() && !benchmarkRunning()) {
+        // Attach FPS listener early
+        attachFpsListener();
+        // Start the benchmark after a brief setup time
+        setTimeout(() => runBenchmark(), 2000);
+      }
     }
   });
 
@@ -170,7 +184,7 @@ const Benchmark = (props) => {
   // ── Overlay styles ──
   const overlayBgStyle = {
     width: 700,
-    height: 100,
+    height: 140,
     color: 0x000000cc,
     borderRadius: 12,
   };
@@ -189,81 +203,91 @@ const Benchmark = (props) => {
   };
 
   return (
-    <View forwardFocus={2}>
-      <View ref={solidLogo} width={300} height={150} x={162} y={80} zIndex={105}>
-        <Text x={80} fontSize={28} color={0xf6f6f699}>
-          Built With:
-        </Text>
-        <View y={32} src="./assets/solidWord.png" width={280} height={52} />
+    <Show when={dataLoaded()} fallback={<Text x={960} y={540} fontSize={40} color={0xffffffff} mount={0.5}>Loading Data...</Text>}>
+      <View forwardFocus={2}>
+        <View ref={solidLogo} width={300} height={150} x={162} y={80} zIndex={105}>
+          <Text x={80} fontSize={28} color={0xf6f6f699}>
+            Built With:
+          </Text>
+          <View y={32} src="./assets/solidWord.png" width={280} height={52} />
 
-        <View x={0} y={110} src="./assets/tmdb.png" width={80} height={41} />
-        <Text x={90} y={110} contain="width" width={160} fontSize={12} color={0xf6f6f699}>
-          This product uses the TMDB API but is not endorsed or certified by TMDB.
-        </Text>
-      </View>
+          <View x={0} y={110} src="./assets/tmdb.png" width={80} height={41} />
+          <Text x={90} y={110} contain="width" width={160} fontSize={12} color={0xf6f6f699}>
+            This product uses the TMDB API but is not endorsed or certified by TMDB.
+          </Text>
+        </View>
 
-      <ContentBlock ref={contentBlock} y={300} x={162} content={heroContent()} />
-      <LazyColumn
-        ref={columnRef}
-        y={500}
-        upCount={3}
-        each={props.data.rows}
-        id="BenchmarkColumn"
-        onSelectedChanged={onRowChanged}
-        onEnter={() => setOpenPanel(true)}
-        autofocus={props.data.rows[0].items()}
-        gap={40}
-        throttleInput={250}
-        style={styles.Column}
-      >
-        {(row) =>
-          row().type === "Hero" ? (
-            <LazyRow
-              gap={80}
-              upCount={2}
-              bufferSize={1}
-              scroll="center"
-              centerScroll
-              each={row().items()}
-              y={50}
-              height={row().height}
-            >
-              {(item) => <Hero item={item()} />}
-            </LazyRow>
-          ) : (
-            <TitleRow row={row()} title={row().title} height={row().height} items={row().items()} />
-          )
-        }
-      </LazyColumn>
-
-      {/* ── Benchmark Overlay ── */}
-      <View x={610} y={20} zIndex={200} style={overlayBgStyle}>
-        <Text x={20} y={16} style={overlayTitleStyle}>
-          Benchmark
-        </Text>
-        <Text
-          x={20}
-          y={54}
-          contain="width"
-          width={660}
-          style={overlayStatusStyle}
-          color={benchmarkDone() ? 0x00ff88ff : benchmarkRunning() ? 0xffcc00ff : 0xaaaaaaff}
+        <ContentBlock ref={contentBlock} y={300} x={162} content={heroContent()} />
+        <LazyColumn
+          ref={columnRef}
+          y={500}
+          upCount={3}
+          each={props.data.rows}
+          id="BenchmarkColumn"
+          onSelectedChanged={onRowChanged}
+          onEnter={() => setOpenPanel(true)}
+          autofocus={props.data.rows[0].items()}
+          gap={40}
+          throttleInput={250}
+          style={styles.Column}
         >
-          {benchmarkStatus()}
-        </Text>
-      </View>
+          {(row) =>
+            row().type === "Hero" ? (
+              <LazyRow
+                gap={80}
+                upCount={2}
+                bufferSize={1}
+                scroll="center"
+                centerScroll
+                each={row().items()}
+                y={50}
+                height={row().height}
+              >
+                {(item) => <Hero item={item()} />}
+              </LazyRow>
+            ) : (
+              <TitleRow row={row()} title={row().title} height={row().height} items={row().items()} />
+            )
+          }
+        </LazyColumn>
 
-      <AssetPanel
-        onFocus={storeFocus}
-        close={() => {
-          setOpenPanel(false);
-          restoreFocus();
-          return true;
-        }}
-        open={openPanel()}
-        item={heroContent()}
-      />
-    </View>
+        {/* ── Benchmark Overlay ── */}
+        <View x={610} y={20} zIndex={200} style={overlayBgStyle}>
+          <Text x={20} y={16} style={overlayTitleStyle}>
+            Benchmark
+          </Text>
+          <Text
+            x={20}
+            y={54}
+            contain="width"
+            width={660}
+            style={overlayStatusStyle}
+            color={benchmarkDone() ? 0x00ff88ff : benchmarkRunning() ? 0xffcc00ff : 0xaaaaaaff}
+          >
+            {benchmarkStatus()}
+          </Text>
+          <Text
+            x={20}
+            y={92}
+            style={overlayStatusStyle}
+            color={0x00ff88ff}
+          >
+            {renderTime() !== null ? `Initial Render: ${renderTime()?.toFixed(2)}ms` : "Rendering..."}
+          </Text>
+        </View>
+
+        <AssetPanel
+          onFocus={storeFocus}
+          close={() => {
+            setOpenPanel(false);
+            restoreFocus();
+            return true;
+          }}
+          open={openPanel()}
+          item={heroContent()}
+        />
+      </View>
+    </Show>
   );
 };
 
