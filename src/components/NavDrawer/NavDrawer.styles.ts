@@ -7,7 +7,7 @@ export default {
     display: "flex",
     width: 140,
     height: 600,
-    y: 360,
+    y: 300,
     gap: 20,
     zIndex: 101,
     transition: {

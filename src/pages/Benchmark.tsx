@@ -1,6 +1,6 @@
 import { createEffect, on, createSignal, batch } from "solid-js";
 import { ElementNode, activeElement, View, Text, renderer } from "@lightningtv/solid";
-import { LazyRow, LazyColumn, useFocusStack, VirtualRow } from "@lightningtv/solid/primitives";
+import { LazyRow, LazyColumn, useFocusStack, VirtualRow, resetCounter } from "@lightningtv/solid/primitives";
 import { Hero, TitleRow, AssetPanel } from "../components";
 import styles from "../styles";
 import { setGlobalBackground } from "../state";
@@ -21,7 +21,6 @@ const Benchmark = (props) => {
 
   // ── Benchmark state ──
   const [benchmarkStatus, setBenchmarkStatus] = createSignal("Waiting for data...");
-  const [avgFps, setAvgFps] = createSignal<number | null>(null);
   const [benchmarkRunning, setBenchmarkRunning] = createSignal(false);
   const [benchmarkDone, setBenchmarkDone] = createSignal(false);
 
@@ -60,6 +59,9 @@ const Benchmark = (props) => {
   }
 
   async function runBenchmark() {
+    // Reset the FPS counter
+    resetCounter();
+
     const totalRows = props.data.rows.length;
     if (totalRows === 0) {
       setBenchmarkStatus("No rows to benchmark");
@@ -68,7 +70,6 @@ const Benchmark = (props) => {
 
     // Reset state
     fpsValues = [];
-    setAvgFps(null);
     setBenchmarkRunning(true);
     setBenchmarkDone(false);
 
@@ -110,9 +111,8 @@ const Benchmark = (props) => {
       const avg = sum / fpsValues.length;
       const min = Math.min(...fpsValues);
       const max = Math.max(...fpsValues);
-      setAvgFps(avg);
       setBenchmarkStatus(
-        `Avg: ${avg.toFixed(1)} FPS | Min: ${min.toFixed(1)} | Max: ${max.toFixed(1)} | Samples: ${fpsValues.length}`
+        `Avg: ${avg.toFixed(1)} FPS  |  Min: ${min.toFixed(1)}  |  Max: ${max.toFixed(1)}  |  Samples: ${fpsValues.length}`
       );
     } else {
       setBenchmarkStatus("Done - No FPS samples collected");
@@ -170,7 +170,7 @@ const Benchmark = (props) => {
   // ── Overlay styles ──
   const overlayBgStyle = {
     width: 700,
-    height: 120,
+    height: 100,
     color: 0x000000cc,
     borderRadius: 12,
   };
@@ -251,16 +251,6 @@ const Benchmark = (props) => {
         >
           {benchmarkStatus()}
         </Text>
-        {avgFps() !== null && (
-          <Text
-            x={20}
-            y={84}
-            style={overlayStatusStyle}
-            color={avgFps()! >= 55 ? 0x00ff88ff : avgFps()! >= 30 ? 0xffcc00ff : 0xff4444ff}
-          >
-            Average FPS: {avgFps()!.toFixed(1)}
-          </Text>
-        )}
       </View>
 
       <AssetPanel
