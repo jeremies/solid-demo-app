@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-VERSIONS=("3.1.6" "3.2.3" "3.2.4" "3.2.5" "3.2.6")
+VERSIONS=("3.1.6" "3.2.3" "3.2.4" "3.2.5" "3.2.6" "3.3.0")
 
 # Iterate through each version
 for VERSION in "${VERSIONS[@]}"; do
