@@ -64,6 +64,7 @@ export default function NavDrawer(props) {
     if (useMatch(() => "/browse/tv")()) return 488;
     if (useMatch(() => "/examples")()) return 578;
     if (useMatch(() => "/benchmark")()) return 668;
+    if (useMatch(() => "/versions")()) return 758;
     return 308;
   });
 
@@ -144,6 +145,14 @@ export default function NavDrawer(props) {
           onEnter={() => handleNavigate("/benchmark")}
         >
           Benchmark
+        </NavButton>
+        <NavButton
+          icon="experiment"
+          iconColor={"#fff"}
+          announce={["Versions", "button"]}
+          onEnter={() => handleNavigate("/versions")}
+        >
+          Versions
         </NavButton>
       </Column>
       <View skipFocus ref={backdrop} style={styles.Gradient} />
